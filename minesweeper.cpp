@@ -117,8 +117,6 @@ public:
     // Install branching
     branch(*this, b, BOOL_VAR_NONE(), BOOL_VAL_MAX());
 
-    DFS<MineSweeper> search_engine(this);
-
   }
 
   /// Print solution
@@ -161,6 +159,7 @@ int
 main(int argc, char* argv[]) {
   SizeOptions opt("MineSweeper");
   opt.size(0);
+  opt.solutions(0); //show all solutions
   opt.parse(argc,argv);
   
   num_mines = atoi(argv[2]);
