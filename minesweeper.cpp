@@ -111,8 +111,7 @@ public:
       }
     
     // linear constraint for number of mines
-    std::cout << nummines << std::endl;
-    linear(*this, b, IRT_EQ, nummines);
+    linear(*this, b, IRT_LQ, nummines);
     
     // Install branching
     branch(*this, b, BOOL_VAR_NONE(), BOOL_VAL_MAX());
@@ -291,10 +290,32 @@ namespace  {
       ".5.4.1.4."
       "..3...3.."
       ".4.3...6."
-      "2...1...2"
-    };
+      "2...1...2",
+      //11
+      "00000000"
+      "00000000"
+      "00011100"
+      "000..200"
+      "000..200"
+      "00011100"
+      "00000000"
+      "00000000",
+      //12
+      "000001.."
+      "000001.."
+      "00000011"
+      "00000000"
+      "00000000"
+      "00000000"
+      "00000000"
+      "00000000"
+};
 
-  /// Number of specifications
+/*
+ * At no. 11, gecode only one solution, so it does not see the mines as different.
+ */
+
+/// Number of specifications
   const unsigned int n_examples = sizeof(specs)/sizeof(char*);
 
   /// Compute the size of a specification
