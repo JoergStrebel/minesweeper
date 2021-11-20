@@ -52,8 +52,9 @@ The following steps happen after every move of the player:
 Here the UI, if the next move is deterministic and the grid is solvable:
 <img src="./docs/screenshot_solvable.png" alt="Player information: game solvable">
 
-Here the UI, if the next move must be guessed and the grid is unsolvable. There is an additional button that reveals a hint, if the player likes one.
+Here the UI, if the next move must be guessed and the grid is unsolvable. There is an additional button that reveals a hint, if the player likes one. The hint consists of a coloured cell on the grid, which is safe to be opened.
 <img src="./docs/screenshot_unsolvable.png" alt="Player information: game unsolvable">
+
 
 ## Implementation
 Checking whether a given area of the grid has a unique solution is a constraint satisfaction problem, and we can use [Gecode](https://www.gecode.org/doc-latest/reference/index.html) to model and solve such problems. There is already an example program available for Minesweeper in the Gecode software package.
