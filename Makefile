@@ -1,11 +1,11 @@
 export CXX = g++
 
-CPPFLAGS=-I/usr/local/include -L/usr/local/lib
+CPPFLAGS= -I./gecode -L./gecode
 
 export CPPFLAGS
 export CXXFLAGS = $(CPPFLAGS) -fcx-limited-range -fno-signaling-nans -fno-rounding-math -ffinite-math-only -fno-math-errno -fno-strict-aliasing -O2 -fvisibility=hidden -ggdb -std=c++11 -Wall -Wextra $(CXXUSR)
 export CFLAGS = $(CPPFLAGS) $(CXXFLAGS) $(CUSR)
-export LDLIBS = -lgecodesearch -lgecodeint -lgecodekernel -lgecodesupport -lgecodedriver -lgecodeminimodel
+export LDLIBS = -lgecodesearch -lgecodeint -lgecodekernel -lgecodesupport -lgecodedriver -lgecodeminimodel -pthread
 
 all: minesweeper
 

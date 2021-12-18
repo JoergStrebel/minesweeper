@@ -160,7 +160,10 @@ main(int argc, char* argv[]) {
   opt.size(0);
   opt.solutions(0); //show all solutions
   opt.parse(argc,argv);
-  
+ if (argc<3) {
+	std::cout << "Info: please give two parameters, one for the grid, one for the mines" << std::endl;
+	return 1;
+ } 
   num_mines = atoi(argv[2]);
   if (opt.size() >= n_examples) {
     std::cerr << "Error: size must be between 0 and "

@@ -1,4 +1,4 @@
-# Designing a better player experience for minesweeper
+# The design of a better player experience for minesweeper
 ## The game
 Minesweeper as a game is widely known and has lots of variants. In this context, the following variant is considered (which is implemented in KDE's KMines and MS Windows Minesweeper programs):
 
@@ -11,32 +11,44 @@ Minesweeper as a game is widely known and has lots of variants. In this context,
 * There is never a mine on the first cell opened by the player (not guaranteed by KMines).
 * Only a limited, but known number of mines are hidden on the grid.
 
-## The issue
-After several turns, the player might arrive at a configuration of the grid, in which the available information is not sufficient to make a safe move. In order to advance, the player then has to resort to guessing which cell could be safe or could be a mine. Here is an example of such a situation in KMines:
+## Unsolvability as the issue
+After several moves, the player might arrive at a configuration of the grid (game state), in which they feel that they cannot decide logically on a safe next move. This situation can have several root causes as listed below.
+
+### Wrong assumptions
+The player may have wrongly flagged cells, e.g. as a guess - the cell shows a flag, but there is no mine in that cell. This way, the number of available flags and the number of mines on the grid differ. This situation can prevent the progress later in the game, as the player is using wrong assumptions about mined cells.
+
+### Bounded Rationality
+The evaluation of the available information (e.g. numbers, already flagged cells etc.) is obviously a subjective one and some game states may seem unsolvable to one player but not to another. Effectively processing all available information is a prerequisite for solvability. If a player overlooks key information, or if a solution is too complex to think of, a game may seem unsolvable (even if it is not).
+
+### Missing Information
+Even if the player perfectly uses all available information and are right in their assumptions, the available information might still be too little for a logical deduction, thereby creating a game state that is ambiguous. In order to advance, the player then has to resort to guessing which cell could be safe or could be a mine. Here is an example of such a situation in KMines:
 
 <img src="./docs/screenshot_incomplete_info.png" alt="Screenshot of KMines">
 
-This in itself, is already mildly frustrating, because Minesweeper is a logic game and hence, the player should be able to solve it based on logic alone.  
-Also, if the player's guess is wrong, the game is lost, which is very frustrating, especially for larger grids. The player invested tens of minutes to arrive at a certain situation, and then loses the game, so all his work so far is also lost.
+All three root causes of unsolvability are somewhat frustrating, because Minesweeper is a logic game and hence, the player should be able to solve it based on logic and the given information alone.  
+Also, if the player has to guess and the player's guess is wrong, the game is lost, which is very frustrating, especially for larger grids. The player invested tens of minutes to arrive at a certain game state, and then loses the game, so all his work so far is also lost.
 
-## The possible solutions
-There are several options to avoid the issue described above:
+## Possible solutions
+There are several options to avoid the issues described above:
 
-1. The program (the programmed logic) could create only solvable grids. I have not seen any implementation and I am not sure this is actually feasible, as the player can open the grid cells in any order, so the available information to him depends on this order, which cannot be foreseen by the program (You could point to https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html, which claims to be always solvable by deduction alone. In my tests, there were instances that I could not solve this way.)
+1. The program (the programmed logic) could create only solvable grids. I have not seen any implementation and I am not sure this is actually feasible, as the player can open the grid cells in any order, so the available information to him depends on this order, which cannot be foreseen by the program (You could point to https://www.chiark.greenend.org.uk/~sgtatham/puzzles/js/mines.html, which claims to be always solvable by deduction alone. In my tests, there were instances that I could not solve this way.) Even with the guarantee of solvable grids, the issues of wrong assumptions and limited rationality still persist, so guessing is still required. Just because a game is solvable in principle does not mean that the player can actually solve it.
 1. The program could grant the player more than one life, so that wrong guesses will not immediately lead to losing the game. Drawback: the player still needs to guess and the number of necessary, but wrong guesses might exceed the available lives, leading again to losing.
-1. In an ambiguous situation, the program could provide hints to the player that they could use to solve the game by deduction alone. For example, the program could open additional cells which provide sufficient information. This approach makes it necessary for the program to understand whether a given configuration is ambiguous or not.
-1. In an ambiguous situation, the program could guarantee that each guess is safe by shuffling around the mines in the grid in accordance with the information revealed so far. For this approach, the program also needs to recognize ambiguous situations and also needs to move mines to new cells. Drawbacks: mines tend to cluster in the remaining closed cells and the player is still required to guess. Example implementation: https://pwmarcz.pl/kaboom/ 
+2. The program could offer the player to play the same grid again, so that they can reuse their knowledge gained in the lost game (KMines offers this option). Drawback: the player still has to guess and lose first and has to repeat the game, which might be frustrating, too.
+3. In an ambiguous situation, the program could guarantee that each guess is safe by shuffling around the mines in the grid in accordance with the information revealed so far. For this approach, the program also needs to recognize ambiguous situations and also needs to move mines to new cells. Drawbacks: mines tend to cluster in the remaining closed cells and the player is still required to guess. Example implementation: https://pwmarcz.pl/kaboom/ 
+1. In an ambiguous situation, the player can actively request more information from the program itself (e.g. a hint). Then the program either shows the player a closed, but safe cell or it tells the player about a wrongly flagged cell.  Additionally, the program proactively checks the game state for consistency and solvability after each move by the player. 
+It can then open additional cells so that the game state is always solvable logically, and it can notify the player about inconsistencies in their last move. These two options eliminate both the need for guessing and also fix the three issue (wrong assumptions, bounded rationality, missing information). However, this approach makes it necessary for the program to understand whether a given configuration is ambiguous or not (by solving it).
 
-The only alternative without guessing is #3, so I'll have a closer look at that. Please leave me a message on Github, if you see other options.
+The only alternative without guessing is the last one, so I'll have a closer look at that. Please leave me a message on Github, if you see other options.
 
 ## Solution design
-### Introduction
+### Requested hints
+### Consistency checks for game states
+### Solvability checks and actions
 There are a number of available solvers for Minesweeper, e.g. [a probabilistic one](https://mrgris.com/projects/minesweepr/), or a [deterministic one](https://www.gecode.org/doc-latest/reference/classMineSweeper.html). The problem with these kinds of solvers is that they solve the whole game, i.e. they try to place all mines. [This computational task is exponentially hard](https://arxiv.org/abs/1204.4659).
 Also, intermediary grid configurations allow for a large number of potential solutions, so the desired solution is not uniquely identifiable. So these approaches are not helpful for guaranteeing a better player experience.
 
 The solution suggested here does not try to solve the whole game, but only solve the current game state in order to determine, if the next move is deterministic or probabilistic, i.e. if the player needs to guess or not. The program does not need to shuffle mines around, it just opens additional cells.
 
-### Program  logic
 I would like to demonstrate the logic with an example. Let's take the screenshot from above: the areas enclosed in red contain the cells that the program would need to look at for solvability. The areas only cover a small part of the grid, so the problem remains computationally tractable.
 
 <img src="./docs/screenshot_solving_region.png" alt="Area of cells that are checked for solvability">
