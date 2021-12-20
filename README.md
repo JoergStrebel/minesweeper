@@ -44,7 +44,7 @@ The only alternative without guessing is the last one, so I'll have a closer loo
 ### Logic changes
 The aforementioned consistency checks for game states are limited to flagged cells. As soon as the player makes a move and flags a cell, the program automatically checks whether this newly set flag fits to the available information on the grid, i.e. already placed flags and the numbers in the open cells around it. If not, the program will actively mark the newly flagged cell with a different color to indicate an inconsistency and to give the player the chance to reconsider.
 
-If the player feels the need for additional information, they can request a hint from the program. The player can choose a special menu item "Hint" in the "Game" menu or they can press a button in the ribbon above the grid. The program then opens randomly one safe cell adjacent to an already opened cell. As the program knows exactly where the mines are, it can easily select a safe cell on demand.
+If the player feels the need for additional information, they can request a hint from the program. The player can choose a special menu item "Hint" in the "Game" menu or they can press a button in the ribbon above the grid. The program then opens one, random safe cell adjacent to an already opened cell. As the program knows exactly where the mines are, it can easily select a safe cell on demand.
 
 The key change to the program is the solvability check and the associated automated actions, which in combination are supposed to ensure that the game is always solvable for the player. Solvability of Minesweeper is not a new idea - there are a number of available solvers for Minesweeper, e.g. [a probabilistic one](https://mrgris.com/projects/minesweepr/), or a [deterministic one](https://www.gecode.org/doc-latest/reference/classMineSweeper.html). The problem with these kinds of solvers is that they solve the whole game, i.e. they try to place all mines. [This computational task is exponentially hard](https://arxiv.org/abs/1204.4659).
 Also, intermediary grid configurations allow for a large number of potential solutions, so the desired solution is not uniquely identifiable. So these approaches are not helpful for guaranteeing a better player experience.
@@ -55,20 +55,18 @@ I would like to demonstrate the logic with an example. Let's take the screenshot
 
 <img src="./docs/screenshot_solving_region.png" alt="Area of cells that are checked for solvability">
 
-TODO 
-The following steps happen after every move of the player:
-1. The program determines all cells for which there is any information available - those are the cells with the red boundary. If the areas are non-overlapping, each area will be solved individually. In the end, at least one area needs to be uniquely and deterministically solvable. The solver uses the total number of mines only as an upper limit, but it does not need to place them all.
-1. The program looks at the whole grid and checks whether the grid has one unique solution under the additional constraint of placing all available mines. The program does not calculate all solutions, but only checks if there are more than one.
-1. If the program determines that there is a deterministic solution, the player is informed about it; no further actions are taken.
-1. If the program determines that there is no deterministic solution, the player receives a warning message and a question whether a hint should be revealed. The hint contains a safe grid cell to open. The player is still free to guess, or they choose to reveal the hint and take the move.
+The following steps happen automatically after every move of the player:
 
-### UI changes
+1. The program determines all cells for which there is any information available - those are the cells within the red boundary (candidate cells). 
+1. The program then tries to solve the game state for the candidate cells. The solver uses the total number of mines only as an upper limit, but it does not need to place them all. The program calculates all solutions for the candidate cells; it includes the player's already placed flags as constraints, and only uses the information on the grid also available to the player (no private information from the game engine itself). The following cases can be distinguished:
+  * The solver finds no solution: this means that the candidate cells display inconsistent data. If the program already detected an inconsistency in the candidate cells  earlier, then the solver can stop here and the rest of the logic can be skipped. If the program did not detect any earlier inconsistencies, the game must be aborted. Nobody can win a game with an inconsistent game state - this situation should never arise, if the program works correctly.
+  * The solver finds exactly one solution: this is the best case - no need for further processing.
+  * The solver finds more than one solution: this is the most likely case, as the placement of the mines on the candidate cells usually exhibits a high degree of symmetry, i.e. the mines can be placed in many different ways. The game logic now needs to determine, if there are invariants in all possible solutions. Are there cells, that are always empty (or mined) in all possible solutions? If so, this is the good case - these cells constitute solutions that the player must also be able to determine logically, thus the grid is solvable. If not, then this is the bad case - there is no logically deductible solution (because there is too little available information in the grid). In this case, the program will then automatically open one random safe cell adjacent to an already opened cell. After opening one cell, the program needs to execute the steps starting from #1 again (just like after a regular move by a player), because there is no guarantee that the newly opened cell makes the candidate cells solvable.
 
-Here the UI, if the next move is deterministic and the grid is solvable:
-<img src="./docs/screenshot_solvable.png" alt="Player information: game solvable">
+### UI changes - TODO
 
-Here the UI, if the next move must be guessed and the grid is unsolvable. There is an additional button that reveals a hint, if the player likes one. The hint consists of a coloured cell on the grid, which is safe to be opened.
-<img src="./docs/screenshot_unsolvable.png" alt="Player information: game unsolvable">
+Here the UI, if the player requested a hint. The hint consists of a coloured cell on the grid, which is safe to be opened.
+<img src="./docs/screenshot_hint.png" alt="Player information: hint is displayed in red">
 
 
 ## Implementation
