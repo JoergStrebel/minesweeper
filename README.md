@@ -44,7 +44,7 @@ The only alternative without guessing is the last one, so I'll have a closer loo
 ### Logic changes
 The aforementioned consistency checks for game states are limited to flagged cells. As soon as the player makes a move and flags a cell, the program automatically checks whether this newly set flag fits to the available information on the grid, i.e. already placed flags and the numbers in the open cells around it. This check is simple: the program just looks at every open cell in the direct vicinity of the flagged cell and counts the flagged cells around it - if the number of flags is higher than the number in the cell, the program will actively mark the newly flagged cell with a different color to indicate an inconsistency and to give the player the chance to reconsider.
 
-If the player feels the need for additional information, they can request a hint from the program. The player can choose a special menu item "Hint" in the "Game" menu or they can press a button in the ribbon above the grid. The program then opens one, random safe cell adjacent to an already opened cell. As the program knows exactly where the mines are, it can easily select a safe cell on demand.
+If the player feels the need for additional information, they can request a hint from the program. The program then opens one, random safe cell adjacent to an already opened cell. As the program knows exactly where the mines are, it can easily select a safe cell on demand.
 
 The key change to the program is the solvability check and the associated automated actions, which in combination are supposed to ensure that the game is always solvable for the player. Solvability of Minesweeper is not a new idea - there are a number of available solvers for Minesweeper, e.g. [a probabilistic one](https://mrgris.com/projects/minesweepr/), or a [deterministic one](https://www.gecode.org/doc-latest/reference/classMineSweeper.html). The problem with these kinds of solvers is that they solve the whole game, i.e. they try to place all mines. [This computational task is exponentially hard](https://arxiv.org/abs/1204.4659).
 Also, intermediary grid configurations allow for a large number of potential solutions, so the desired solution is not uniquely identifiable. So these approaches are not helpful for guaranteeing a better player experience.
@@ -71,15 +71,28 @@ The solver runs described above yield another insightful piece of information, n
 2. The solver identifies cells that never carry mines,  but the player has flagged them in past moves. This case is problematic, as it proves that the player's reasoning is either incomplete or illogical. As a consequence, the player might run out of flags in a later stage of the game. The program should give a corresponding hint to the player.
 3. The solver identifies cells that sometimes carry mines,  but the player has flagged them in past moves. This is less problematic - the status of these cells will become clearer in the course of the game, and then they'll fall into case #1 or #2. No immediate action required by the program here.
 
-### UI changes - TODO
+### UI changes
+There are two UI changes resulting from the solution design described above.
 
-Here the UI, if the player requested a hint. The hint consists of a coloured cell on the grid, which is safe to be opened.
-<img src="./docs/screenshot_hint.png" alt="Player information: hint is displayed in red">
+The UI offers a special menu item "Get hint" in the "Game" menu and a button labeled "Get hint" in the tool bar above the grid. If the player clicks either one, the program automatically opens a closed cell (without giving a further visual cue to the player).
 
+The second UI change consists of the introduction of a special error emblem to each flagged cell, which indicates that the player set a flag in the wrong spot.
+
+<img src="./docs/sign-error-svgrepo-com.png" alt="The error emblem">
+
+Please see the following picture as an example:
+
+<img src="./docs/screenshot_error.png" alt="The error emblem indicates a wrongly placed flag.">
+The flag appears as soon as the program recognizes the issue and disappears as soon as the player removes the flag. It is just a visual cue and does not alter the game's usability. The player is still free to continue the game uninhibitedly (although they cannot win it).
 
 ## Implementation
-Checking whether a given area of the grid has a unique solution is a constraint satisfaction problem, and we can use [Gecode](https://www.gecode.org/doc-latest/reference/index.html) to model and solve such problems. There is already an example program available for Minesweeper in the Gecode software package.
+Checking whether the candidate cells in the grid have a unique solution is a constraint satisfaction problem, and we can use [Gecode](https://www.gecode.org/doc-latest/reference/index.html) to model and solve such problems. There is already an example program available for Minesweeper in the Gecode software package.
 
-The implementation is ongoing. The KDE KMines game will act as the graphical front-end. The source code is available in the [KDE git repo](https://invent.kde.org/games/kmines). As the standard Linux distributions neither feature the latest KDE Framework version nor the latest Qt libraries, I need to pick a commit version, that fits to the KDE packages installed on my computer. As I am using openSUSE Leap 15.3, I'll go back to version v20.07.80 of KMines.
+The implementation is ongoing. The KDE KMines game will act as the graphical front-end. The source code is available in the [KDE git repo](https://invent.kde.org/games/kmines). As the standard Linux distributions neither feature the latest KDE Framework version nor the latest Qt libraries, I need to pick a commit version, that fits to the KDE packages installed on my computer. As I am using openSUSE Leap 15.3, I'll go back to version v20.07.80 of KMines and fork it for the purpose of this project.
+
+## References
+
+* Error icon provided by [SVG Repo](https://www.svgrepo.com/svg/362154/sign-error) 
+
 
 
