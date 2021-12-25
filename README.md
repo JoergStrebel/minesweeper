@@ -90,6 +90,10 @@ Checking whether the candidate cells in the grid have a unique solution is a con
 
 The implementation is ongoing. The KDE KMines game will act as the graphical front-end. The source code is available in the [KDE git repo](https://invent.kde.org/games/kmines). As the standard Linux distributions neither feature the latest KDE Framework version nor the latest Qt libraries, I need to pick a commit version, that fits to the KDE packages installed on my computer. As I am using openSUSE Leap 15.3, I'll go back to version v20.07.80 of KMines and fork it for the purpose of this project.
 
+### Build instructions
+Needed package "libkdegames-devel"
+ 
+
 ## References
 
 * Error icon provided by [SVG Repo](https://www.svgrepo.com/svg/362154/sign-error) 

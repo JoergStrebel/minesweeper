@@ -43,6 +43,7 @@ private Q_SLOTS:
     void configureSettings();
     void pauseGame(bool paused);
     void loadSettings();
+    void getHint();
 private:
     void setupActions();
     KMinesScene* m_scene = nullptr;
