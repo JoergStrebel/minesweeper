@@ -8,7 +8,7 @@ Minesweeper as a game is widely known and has lots of variants. In this context,
 * The game has no time limit, and the player is scored on the length of the game - the faster, the better.
 * The player loses the game when he opens a cell with a mine. So the player has only one life in the game.
 * The player wins the game when he opens all cells without mines and correctly flags all mined cells.
-* There is never a mine on the first cell opened by the player (not guaranteed by KMines).
+* There is never a mine on the first cell opened by the player (guaranteed by KMines).
 * Only a limited, but known number of mines are hidden on the grid.
 
 ## Unsolvability as the issue

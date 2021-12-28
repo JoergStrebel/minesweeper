@@ -40,7 +40,7 @@
 #include "ui_generalopts.h"
 
 /*
- * Classes for config dlg pages
+ * Classes for config dialog pages
  */
 class CustomGameConfig : public QWidget
 {
@@ -137,15 +137,19 @@ void KMinesMainWindow::setupActions()
     connect(Kg::difficulty(), &KgDifficulty::currentLevelChanged, this, &KMinesMainWindow::newGame);
     
     //Set up additional Advisor actions
+    // first get_hint
     QAction* getHintAction = new QAction(this);
     getHintAction->setText(i18n("&Get Hint"));
     
     QIcon hinticon = QIcon::fromTheme(QStringLiteral("help-faq"));
     
     getHintAction->setIcon(hinticon);
-    actionCollection()->setDefaultShortcut(getHintAction, Qt::CTRL + Qt::Key_W);
+    actionCollection()->setDefaultShortcut(getHintAction, Qt::CTRL + Qt::Key_H);
     actionCollection()->addAction( QStringLiteral("my_gethint") , getHintAction);
     connect(getHintAction, SIGNAL(triggered(bool)), this, SLOT(getHint()));
+    
+    // TODO: insert KToggleAction for Advisor activation
+    
     
 #if QT_VERSION < QT_VERSION_CHECK(5, 14, 0)
     setupGUI(QApplication::screens().at(0)->availableGeometry().size() * 0.4);

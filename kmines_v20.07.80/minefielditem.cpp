@@ -234,6 +234,9 @@ int MineFieldItem::minesCount() const
     return m_minesCount;
 }
 
+/**
+ * this method does not do anything, it just exists for completeness reasons
+ */
 void MineFieldItem::paint( QPainter * painter, const QStyleOptionGraphicsItem* opt, QWidget* w)
 {
     Q_UNUSED(painter);
